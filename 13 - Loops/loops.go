@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"time"
 )
 
 func main() {
@@ -43,6 +44,18 @@ func main() {
 	users := map[int]string{
 		1: "One",
 		2: "Dois",
+	}
+
+	for key, value := range users {
+		fmt.Println(key, value)
+	}
+
+	// can't do range in a struct! only in maps, arrays etc
+
+	// endless loop
+	for {
+		time.Sleep(time.Second)
+		fmt.Println("endless loop")
 	}
 
 }
