@@ -1,6 +1,16 @@
+// STARTING PROJECT
 // go mod init command-line
 // go get github.com/urfave/cli
+
+// RUNNING PROJECT
 // to run: go run main.go
+// to run ip command: go run main.go ip --host www.amazon.com.br
+// to run servers command: go run main.go servers --host www.amazon.com.br
+
+// BUILD PROJECT
+// to build: go build
+// ./command-line ip --host <host>
+// ./command-line servers --host <host>
 
 package main
 
