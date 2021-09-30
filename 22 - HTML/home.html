@@ -1,13 +1,28 @@
 <!-- htlm:5 command -->
+<!-- W3 schools -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Main Page</title>
+    <style>
+        h4 {
+            color: green;
+            font-size: 40px; 
+            font-family: Verdana, Geneva, Tahoma, sans-serif;
+        }
+    </style>
 </head>
 <body>
-    
+    <h1>This is the main page</h1>
+    <!-- less recommended way for CSS -->
+    <h2 style="color: blue; font-size: 20px; font-family: Verdana, Geneva, Tahoma, sans-serif;">
+        Welcome, {{ .Name }} with Email {{ .Email }}
+    </h2>
+    <marquee>
+        <h4>This is so stupid</h4>
+    </marquee>
 </body>
 </html>
