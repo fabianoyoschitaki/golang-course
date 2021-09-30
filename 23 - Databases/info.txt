@@ -1,0 +1,54 @@
+Let's use MySQL as the database.
+
+#####################################################################################
+LINUX INSTALLATION
+#####################################################################################
+
+# INSTALLATION
+1. sudo apt-get update
+2. sudo apt-get install mysql-server
+3. sudo mysql_secure_installation utility
+    3.1 N
+    3.2 root password (only to create a new user)
+    3.3 Y
+    3.4 N 
+    3.5 Y
+    3.6 Y
+
+# STARTING
+4. sudo systemctl start mysql (in case it's not running) or sudo systemctl enable mysql to run when your computer starts
+
+# LOGGING INTO MYSQL AND CREATING DATABASE AND TABLE
+5. sudo mysql -u root -p 
+    5.1 inform password
+    5.2 create database devbook;
+    5.3 show databases; # should show all databases including devbook
+    5.4 use devbook; # select database
+    5.5 create table users(
+        id int auto_increment primary key,
+        name varchar(50) not null,
+        email varchar(50) not null
+    ) ENGINE=INNODB;
+# CREATING USER FOR DATABASE
+6. create user 'golang'@'localhost' IDENTIFIED BY 'password123';
+
+# ADD PERMISSIONS TO USER
+7. grant all privileges on devbook.* to 'golang'@'localhost';
+
+# LOG OFF AS ROOT
+8. exit
+
+# LOGGING IN WITH NEW USER
+9. sudo mysql -u golang -p
+    9.1 <password>
+
+#####################################################################################
+# MACOS INSTALLATION - https://dev.mysql.com/doc/refman/8.0/en/macos-installation.html
+#####################################################################################
+
+https://dev.mysql.com/downloads/mysql/
+
+
+
+
+

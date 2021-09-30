@@ -21,8 +21,14 @@
     <h2 style="color: blue; font-size: 20px; font-family: Verdana, Geneva, Tahoma, sans-serif;">
         Welcome, {{ .Name }} with Email {{ .Email }}
     </h2>
-    <marquee>
-        <h4>This is so stupid</h4>
-    </marquee>
+    
+    <button id="main-btn">Click here!</button>
+    <script>
+        var btn = document.getElementById("main-btn");
+        btn.onclick = function (){
+            alert("Button was clicked, this is amazing...");
+        }
+    </script>
+
 </body>
 </html>
