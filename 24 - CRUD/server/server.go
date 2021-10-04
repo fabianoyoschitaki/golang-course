@@ -15,6 +15,48 @@ type user struct {
 	Email string `json:"email"`
 }
 
+// FetchUsers fetches all users from database
+func FetchUsers(rw http.ResponseWriter, r *http.Request) {
+	db, error := database.Connect()
+	if error != nil {
+		rw.Write([]byte("Error when connecting to database"))
+		return
+	}
+	defer db.Close()
+
+	// SELECT * FROM USERS
+	rows, error := db.Query("select * from users")
+	if error != nil {
+		rw.Write([]byte("Error when fetching users"))
+		return
+	}
+	defer rows.Close()
+
+	var users []user
+	for rows.Next() {
+		var user user
+
+		// ID  NAME EMAIL
+		if error := rows.Scan(&user.ID, &user.Name, &user.Email); error != nil {
+			rw.Write([]byte("Error when scanning user"))
+			return
+		}
+
+		users = append(users, user)
+	}
+	rw.WriteHeader(http.StatusOK)
+	if error := json.NewEncoder(rw).Encode(users); error != nil {
+		rw.Write([]byte("Error when converting users to JSON"))
+		return
+	}
+
+}
+
+// FetchUsers fetches all users from database
+func FetchUser(rw http.ResponseWriter, r *http.Request) {
+
+}
+
 // CreateUser creates a new user
 func CreateUser(rw http.ResponseWriter, r *http.Request) {
 
