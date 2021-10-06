@@ -1,0 +1,30 @@
+API - DevBook
+* FE -> BE -> Database
+
+[Packages]
+- Main packages (Structure)
+    - Main (the only that can be executed)
+    - Router
+    - Controllers
+    - Models (user and publish structs)
+    - Repositories
+- Helper packages 
+    - Config (environment vars, a good practice)
+    - Database (open connection)
+    - Authentication (login, token etc)
+    - Middleware (between request and response, check if user is already authenticated)
+    - Security (passwords, hashes)
+    - Responses (to create a pattern for our API responses)
+
+[Backend]
+- Create api folder and run "go mod init api" (in the root folder)
+- Add mux: go get github.com/gorilla/mux
+
+[Database]
+- Run mysql in the terminal: mysql -u root
+- Execute script.sql
+- Database will use environment variables (config)
+
+[Environment Variables]
+- config package + .env file
+- go get github.com/joho/godotenv
