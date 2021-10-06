@@ -24,6 +24,7 @@ API - DevBook
 - Run mysql in the terminal: mysql -u root
 - Execute script.sql
 - Database will use environment variables (config)
+- go get github.com/go-sql-driver/mysql
 
 [Environment Variables]
 - config package + .env file
