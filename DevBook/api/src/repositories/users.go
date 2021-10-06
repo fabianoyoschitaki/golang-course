@@ -3,23 +3,81 @@ package repositories
 import (
 	"api/src/models"
 	"database/sql"
+	"fmt"
 )
 
-// it's lowercase because we won't export it
-type users struct {
+type Users struct {
 	db *sql.DB // will receive a database from controllers
 }
 
-// NewUsersRepository creates users repository
-func NewUsersRepository(db *sql.DB) *users {
+// NewUsersRepository creates Users repository
+func NewUsersRepository(db *sql.DB) *Users {
 	// inside this struct we'll have the database operations, insert, update etc.
 	// #IMPORTANT: controller only opens connection, repository makes connection with tables
-	return &users{db}
+	return &Users{db}
+}
+
+// Search returns all users which has name or nick
+func (repo Users) Search(nameOrNick string) ([]models.User, error) {
+	nameOrNick = fmt.Sprintf("%%%s%%", nameOrNick) // %nameOrNick%, we need to scape %
+
+	// query where name or nick like
+	rows, error := repo.db.Query("select id, name, nick, email, created_at from users where name like ? or nick like ?",
+		nameOrNick, nameOrNick)
+	if error != nil {
+		return nil, error
+	}
+	defer rows.Close()
+
+	// response
+	var usersFound []models.User
+	for rows.Next() {
+		var currentUser models.User
+		if error = rows.Scan(
+			&currentUser.ID,
+			&currentUser.Name,
+			&currentUser.Nick,
+			&currentUser.Email,
+			&currentUser.CreatedAt,
+		); error != nil {
+			return nil, error
+		}
+		usersFound = append(usersFound, currentUser)
+	}
+	return usersFound, nil
+}
+
+// FetchUserByID fetches a single user by its ID
+func (repo Users) FetchUserByID(userID uint64) (models.User, error) {
+	// query where name or nick like
+	rows, error := repo.db.Query(
+		"select id, name, nick, email, created_at from users where id = ?", userID,
+	)
+
+	if error != nil {
+		return models.User{}, error
+	}
+	defer rows.Close()
+
+	// response
+	var userResponse models.User
+	if rows.Next() {
+		if error = rows.Scan(
+			&userResponse.ID,
+			&userResponse.Name,
+			&userResponse.Nick,
+			&userResponse.Email,
+			&userResponse.CreatedAt,
+		); error != nil {
+			return models.User{}, error
+		}
+	}
+	return userResponse, nil
 }
 
 // Create inserts a new user in the database
-func (repository users) Create(user models.User) (uint64, error) {
-	statement, error := repository.db.Prepare("insert into users (name, nick, email, password) values (?, ?, ?, ?)")
+func (repo Users) Create(user models.User) (uint64, error) {
+	statement, error := repo.db.Prepare("insert into users (name, nick, email, password) values (?, ?, ?, ?)")
 	if error != nil {
 		return 0, error
 	}

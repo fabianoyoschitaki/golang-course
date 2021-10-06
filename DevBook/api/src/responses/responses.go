@@ -9,6 +9,7 @@ import (
 // generic interface. to be used by any kind of data, we need interface{}
 // JSON writes json to response
 func JSON(rw http.ResponseWriter, statusCode int, data interface{}) {
+	rw.Header().Set("Content-Type", "application/json")
 	rw.WriteHeader(statusCode)
 
 	// writes data JSON to response
