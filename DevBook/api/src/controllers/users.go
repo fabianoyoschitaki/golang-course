@@ -7,6 +7,7 @@ import (
 	"api/src/repositories"
 	"api/src/responses"
 	"encoding/json"
+	"errors"
 	"io/ioutil"
 	"net/http"
 	"strconv"
@@ -138,7 +139,7 @@ func UpdateUser(rw http.ResponseWriter, r *http.Request) {
 	}
 	// User is authenticated, but it's forbidden (403) due to not being allowed to update another user
 	if loggedUserID != userID {
-		responses.Error(rw, http.StatusForbidden, error)
+		responses.Error(rw, http.StatusForbidden, errors.New("it's not possible to update a different user"))
 		return
 	}
 
@@ -190,6 +191,17 @@ func DeleteUser(rw http.ResponseWriter, r *http.Request) {
 	userID, error := strconv.ParseUint(parameters["id"], 10, 64)
 	if error != nil {
 		responses.Error(rw, http.StatusBadRequest, error) // bad request because ID should be number, not string.
+		return
+	}
+
+	// only own user could delete himself
+	loggedUserID, error := authentication.ExtractUserId(r)
+	if error != nil {
+		responses.Error(rw, http.StatusUnauthorized, error)
+		return
+	}
+	if loggedUserID != userID {
+		responses.Error(rw, http.StatusForbidden, errors.New("it's not possible to delete a user that is not you"))
 		return
 	}
 
