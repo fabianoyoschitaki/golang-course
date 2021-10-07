@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"api/src/authentication"
 	"api/src/database"
 	"api/src/models"
 	"api/src/repositories"
@@ -126,6 +127,18 @@ func UpdateUser(rw http.ResponseWriter, r *http.Request) {
 	userID, error := strconv.ParseUint(parameters["id"], 10, 64)
 	if error != nil {
 		responses.Error(rw, http.StatusBadRequest, error) // bad request because ID should be number, not string.
+		return
+	}
+
+	// validating if logged user is the same being updated
+	loggedUserID, error := authentication.ExtractUserId(r)
+	if error != nil {
+		responses.Error(rw, http.StatusUnauthorized, error)
+		return
+	}
+	// User is authenticated, but it's forbidden (403) due to not being allowed to update another user
+	if loggedUserID != userID {
+		responses.Error(rw, http.StatusForbidden, error)
 		return
 	}
 
