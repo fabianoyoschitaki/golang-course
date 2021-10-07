@@ -106,6 +106,84 @@ func (repo Users) Delete(ID uint64) error {
 	return nil
 }
 
+// FetchUserFollowing returns all users which a user follows
+func (repo Users) FetchUserFollowing(userID uint64) ([]models.User, error) {
+	rows, error := repo.db.Query(`
+		select u.id, u.name, u.nick, u.email, u.created_at 
+		from users u
+		inner join user_followers uf on u.id = uf.user_id
+		where uf.follower_user_id = ?
+	`, userID)
+	if error != nil {
+		return nil, error
+	}
+	defer rows.Close()
+
+	var followingUsers []models.User
+	for rows.Next() {
+		var followingUser models.User
+		if error := rows.Scan(
+			&followingUser.ID,
+			&followingUser.Name,
+			&followingUser.Nick,
+			&followingUser.Email,
+			&followingUser.CreatedAt,
+		); error != nil {
+			return nil, error
+		}
+
+		followingUsers = append(followingUsers, followingUser)
+	}
+	return followingUsers, nil
+}
+
+// FetchUserFollowers returns all followers of a user
+func (repo Users) FetchUserFollowers(userID uint64) ([]models.User, error) {
+	rows, error := repo.db.Query(`
+		select u.id, u.name, u.nick, u.email, u.created_at 
+		from users u
+		inner join user_followers uf on u.id = uf.follower_user_id
+		where uf.user_id = ?
+	`, userID)
+	if error != nil {
+		return nil, error
+	}
+	defer rows.Close()
+
+	var followers []models.User
+	for rows.Next() {
+		var follower models.User
+		if error := rows.Scan(
+			&follower.ID,
+			&follower.Name,
+			&follower.Nick,
+			&follower.Email,
+			&follower.CreatedAt,
+		); error != nil {
+			return nil, error
+		}
+
+		followers = append(followers, follower)
+	}
+	return followers, nil
+}
+
+// UnfollowUser allows a user to unfollow another user
+func (repo Users) UnfollowUser(followedUserID, followerUserID uint64) error {
+	statement, error := repo.db.Prepare(
+		"delete from user_followers where user_id = ? and follower_user_id = ?",
+	)
+	if error != nil {
+		return error
+	}
+	defer statement.Close()
+
+	if _, error := statement.Exec(followedUserID, followerUserID); error != nil {
+		return error
+	}
+	return nil
+}
+
 // FollowUser allows a user to follow another user
 func (repo Users) FollowUser(followedUserID, followerUserID uint64) error {
 	// #IMPORTANT we ignore in case the relationship already exists, so that we avoid an extra fetch query to validate it
