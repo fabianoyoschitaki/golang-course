@@ -106,6 +106,32 @@ func (repo Users) Delete(ID uint64) error {
 	return nil
 }
 
+// FetchUserByEmail returns user given an email
+func (repo Users) FetchUserByEmail(email string) (models.User, error) {
+
+	// query for ID and password
+	rows, error := repo.db.Query(
+		"select id, password from users where  email = ?", email,
+	)
+
+	if error != nil {
+		return models.User{}, error
+	}
+	defer rows.Close()
+
+	// user found
+	var userResponse models.User
+	if rows.Next() {
+		if error = rows.Scan(
+			&userResponse.ID,
+			&userResponse.Password,
+		); error != nil {
+			return models.User{}, error
+		}
+	}
+	return userResponse, nil
+}
+
 // Create inserts a new user in the database
 func (repo Users) Create(user models.User) (uint64, error) {
 	statement, error := repo.db.Prepare("insert into users (name, nick, email, password) values (?, ?, ?, ?)")

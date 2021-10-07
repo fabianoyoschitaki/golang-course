@@ -15,6 +15,9 @@ var (
 
 	// Port where the API is running
 	ApplicationPort = 0
+
+	// Key used to sign JWT
+	SecretKey []byte
 )
 
 // LoadConfiguration initializes environment variables
@@ -38,4 +41,7 @@ func LoadConfiguration() {
 		os.Getenv("DB_PASSWORD"),
 		os.Getenv("DB_NAME"),
 	)
+
+	// JWT secret key
+	SecretKey = []byte(os.Getenv("JWT_SECRET_KEY"))
 }

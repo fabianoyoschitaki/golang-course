@@ -8,6 +8,17 @@ import (
 	"net/http"
 )
 
+// #IMPORTANT this is only a one time function to generate a random base64 secret for JWT
+// func init() {
+// 	key := make([]byte, 64)
+// 	if _, error := rand.Read(key); error != nil {
+// 		log.Fatal(error)
+// 	}
+
+// 	base64Key := base64.StdEncoding.EncodeToString(key)
+// 	fmt.Printf("JWT secret key is: %s", base64Key)
+// }
+
 func main() {
 	config.LoadConfiguration()
 	// fmt.Println(config.ApplicationPort)

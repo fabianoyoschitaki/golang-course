@@ -16,7 +16,11 @@ type Route struct {
 
 // Configure configures all routes
 func Configure(r *mux.Router) *mux.Router {
-	routes := routeUsers // from users.go
+
+	// routes from users.go
+	routes := routeUsers
+	// route from login.go
+	routes = append(routes, loginRoute)
 
 	// a simple for we can configure all routes for our application
 	for _, route := range routes {
