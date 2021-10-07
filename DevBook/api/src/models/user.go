@@ -4,6 +4,8 @@ import (
 	"errors"
 	"strings"
 	"time"
+
+	"github.com/badoux/checkmail"
 )
 
 // User represents a user
@@ -17,8 +19,8 @@ type User struct {
 }
 
 // Prepare validates and formats user
-func (u *User) Prepare() error {
-	if error := u.validate(); error != nil {
+func (u *User) Prepare(step string) error {
+	if error := u.validate(step); error != nil {
 		return error
 	}
 
@@ -26,7 +28,7 @@ func (u *User) Prepare() error {
 	return nil
 }
 
-func (u *User) validate() error {
+func (u *User) validate(step string) error {
 	if u.Name == "" {
 		return errors.New("User name can't be blank")
 	}
@@ -36,7 +38,12 @@ func (u *User) validate() error {
 	if u.Email == "" {
 		return errors.New("User email can't be blank")
 	}
-	if u.Password == "" {
+	if error := checkmail.ValidateFormat(u.Email); error != nil {
+		// could return same error
+		return errors.New("User email is invalid")
+	}
+
+	if step == "signup" && u.Password == "" {
 		return errors.New("User password can't be blank	")
 	}
 	return nil

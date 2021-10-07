@@ -29,3 +29,7 @@ API - DevBook
 [Environment Variables]
 - config package + .env file
 - go get github.com/joho/godotenv
+
+[External libs]
+- mail validation: go get github.com/badoux/checkmail
+- BCrypt: go get golang.org/x/crypto/bcrypt

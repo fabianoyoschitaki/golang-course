@@ -34,7 +34,7 @@ func CreateUser(rw http.ResponseWriter, r *http.Request) {
 	}
 
 	// Validate user according to our rules
-	if error = user.Prepare(); error != nil {
+	if error = user.Prepare("signup"); error != nil {
 		// 400 - bad request
 		responses.Error(rw, http.StatusBadRequest, error)
 		return
@@ -120,10 +120,81 @@ func FetchUser(rw http.ResponseWriter, r *http.Request) {
 
 // UpdateUser updates a user
 func UpdateUser(rw http.ResponseWriter, r *http.Request) {
-	rw.Write([]byte("Creating user"))
+	parameters := mux.Vars(r) // parameters: {id}
+
+	// getting id path parameter
+	userID, error := strconv.ParseUint(parameters["id"], 10, 64)
+	if error != nil {
+		responses.Error(rw, http.StatusBadRequest, error) // bad request because ID should be number, not string.
+		return
+	}
+
+	// read request body
+	requestBody, error := ioutil.ReadAll(r.Body)
+	if error != nil {
+		responses.Error(rw, http.StatusUnprocessableEntity, error)
+		return
+	}
+
+	// request body to struct
+	var userToUpdate models.User
+	if error = json.Unmarshal(requestBody, &userToUpdate); error != nil {
+		responses.Error(rw, http.StatusBadRequest, error)
+		return
+	}
+
+	// Validate user according to our rules
+	if error = userToUpdate.Prepare("update"); error != nil {
+		// 400 - bad request
+		responses.Error(rw, http.StatusBadRequest, error)
+		return
+	}
+
+	// open connection
+	db, error := database.Connect()
+	if error != nil {
+		responses.Error(rw, http.StatusInternalServerError, error)
+		return
+	}
+	defer db.Close()
+
+	// create repository
+	repository := repositories.NewUsersRepository(db)
+	if error = repository.Update(userID, userToUpdate); error != nil {
+		responses.Error(rw, http.StatusInternalServerError, error)
+		return
+	}
+
+	// return 204
+	responses.JSON(rw, http.StatusNoContent, nil)
 }
 
 // DeleteUser deletes a new user
 func DeleteUser(rw http.ResponseWriter, r *http.Request) {
-	rw.Write([]byte("Creating user"))
+	parameters := mux.Vars(r) // parameters: {id}
+
+	// getting id path parameter
+	userID, error := strconv.ParseUint(parameters["id"], 10, 64)
+	if error != nil {
+		responses.Error(rw, http.StatusBadRequest, error) // bad request because ID should be number, not string.
+		return
+	}
+
+	// open connection
+	db, error := database.Connect()
+	if error != nil {
+		responses.Error(rw, http.StatusInternalServerError, error)
+		return
+	}
+	defer db.Close()
+
+	// create repository
+	repository := repositories.NewUsersRepository(db)
+	if error = repository.Delete(userID); error != nil {
+		responses.Error(rw, http.StatusInternalServerError, error)
+		return
+	}
+
+	// return 204
+	responses.JSON(rw, http.StatusNoContent, nil)
 }

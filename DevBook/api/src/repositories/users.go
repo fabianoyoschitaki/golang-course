@@ -75,6 +75,37 @@ func (repo Users) FetchUserByID(userID uint64) (models.User, error) {
 	return userResponse, nil
 }
 
+// Update updates a user in the database
+func (repo Users) Update(ID uint64, userToUpdate models.User) error {
+	statement, error := repo.db.Prepare(("update users set name = ?, nick = ?, email = ? where id = ?"))
+	if error != nil {
+		return error
+	}
+	defer statement.Close()
+
+	_, error = statement.Exec(userToUpdate.Name, userToUpdate.Nick, userToUpdate.Email, ID)
+	if error != nil {
+		return nil
+	}
+	// everything is alright
+	return nil
+}
+
+// Delete deletes a user from the database
+func (repo Users) Delete(ID uint64) error {
+	statement, error := repo.db.Prepare("delete from users where id = ?")
+	if error != nil {
+		return error
+	}
+	defer statement.Close()
+
+	_, error = statement.Exec(ID)
+	if error != nil {
+		return error
+	}
+	return nil
+}
+
 // Create inserts a new user in the database
 func (repo Users) Create(user models.User) (uint64, error) {
 	statement, error := repo.db.Prepare("insert into users (name, nick, email, password) values (?, ?, ?, ?)")
