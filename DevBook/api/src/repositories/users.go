@@ -106,6 +106,24 @@ func (repo Users) Delete(ID uint64) error {
 	return nil
 }
 
+// FollowUser allows a user to follow another user
+func (repo Users) FollowUser(followedUserID, followerUserID uint64) error {
+	// #IMPORTANT we ignore in case the relationship already exists, so that we avoid an extra fetch query to validate it
+	statement, error := repo.db.Prepare(
+		"insert IGNORE into user_followers (user_id, follower_user_id) values (?, ?)",
+	)
+	if error != nil {
+		return error
+	}
+	defer statement.Close()
+
+	if _, error := statement.Exec(followedUserID, followerUserID); error != nil {
+		return error
+	}
+	// everything is alright
+	return nil
+}
+
 // FetchUserByEmail returns user given an email
 func (repo Users) FetchUserByEmail(email string) (models.User, error) {
 

@@ -9,6 +9,7 @@ import (
 	"encoding/json"
 	"errors"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"strconv"
 	"strings"
@@ -221,5 +222,49 @@ func DeleteUser(rw http.ResponseWriter, r *http.Request) {
 	}
 
 	// return 204
+	responses.JSON(rw, http.StatusNoContent, nil)
+}
+
+// FollowUser follows a specific user
+func FollowUser(rw http.ResponseWriter, r *http.Request) {
+
+	// logged user is the follower
+	followerUserID, error := authentication.ExtractUserId(r)
+	if error != nil {
+		responses.Error(rw, http.StatusUnauthorized, error)
+		return
+	}
+
+	// followed user comes from path variable
+	parameters := mux.Vars(r)
+	followedUserID, error := strconv.ParseUint(parameters["id"], 10, 64)
+	if error != nil {
+		responses.Error(rw, http.StatusBadRequest, error)
+		return
+	}
+
+	// validates if user is trying to follow himself
+	log.Printf("User %d wants to follow user %d", followerUserID, followedUserID)
+	if followedUserID == followerUserID {
+		responses.Error(rw, http.StatusForbidden, errors.New("it's not possible to follow yourself"))
+		return
+	}
+
+	// everything is ok now
+	db, error := database.Connect()
+	if error != nil {
+		responses.Error(rw, http.StatusInternalServerError, error)
+		return
+	}
+	defer db.Close()
+
+	// create repository and save the new follow
+	userRepo := repositories.NewUsersRepository(db)
+	if error := userRepo.FollowUser(followedUserID, followerUserID); error != nil {
+		responses.Error(rw, http.StatusInternalServerError, error)
+		return
+	}
+
+	// if everything is ok we return HTTP 204
 	responses.JSON(rw, http.StatusNoContent, nil)
 }
