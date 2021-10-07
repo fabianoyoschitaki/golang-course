@@ -1,6 +1,7 @@
 package models
 
 import (
+	"api/src/security"
 	"errors"
 	"strings"
 	"time"
@@ -20,11 +21,13 @@ type User struct {
 
 // Prepare validates and formats user
 func (u *User) Prepare(step string) error {
-	if error := u.validate(step); error != nil {
-		return error
+	if err := u.validate(step); err != nil {
+		return err
 	}
 
-	u.format()
+	if err := u.format(step); err != nil {
+		return err
+	}
 	return nil
 }
 
@@ -49,9 +52,19 @@ func (u *User) validate(step string) error {
 	return nil
 }
 
-func (u *User) format() {
+func (u *User) format(step string) error {
 	u.Name = strings.TrimSpace(u.Name)
 	u.Nick = strings.TrimSpace(u.Nick)
 	u.Email = strings.TrimSpace(u.Email)
-	// not email since space could be on purpose
+	// don't do it for the password since space could be on purpose
+
+	// if we're signing up, then we should hash the informed password with BCrypt
+	if step == "signup" {
+		hashedPassword, err := security.Hash(u.Password)
+		if err != nil {
+			return err
+		}
+		u.Password = string(hashedPassword)
+	}
+	return nil
 }
