@@ -4,6 +4,7 @@ import (
 	"api/src/models"
 	"database/sql"
 	"fmt"
+	"log"
 )
 
 type Users struct {
@@ -45,6 +46,26 @@ func (repo Users) Search(nameOrNick string) ([]models.User, error) {
 		usersFound = append(usersFound, currentUser)
 	}
 	return usersFound, nil
+}
+
+// FetchUserHashedPasswordByID fetches user hashed password by its ID
+func (repo Users) FetchUserHashedPasswordByID(userID uint64) (string, error) {
+	row, error := repo.db.Query("select password from users where id = ?", userID)
+	if error != nil {
+		log.Printf("Error: %s", error)
+		return "", error
+	}
+	defer row.Close()
+
+	var u models.User
+	// if we have something
+	if row.Next() {
+		if error = row.Scan(&u.Password); error != nil {
+			return "", error
+		}
+	}
+	// return only password
+	return u.Password, nil
 }
 
 // FetchUserByID fetches a single user by its ID
@@ -226,6 +247,21 @@ func (repo Users) FetchUserByEmail(email string) (models.User, error) {
 		}
 	}
 	return userResponse, nil
+}
+
+// UpdatePassword updates a user's password
+func (repo Users) UpdatePassword(userID uint64, newHashedPassword string) error {
+	statement, error := repo.db.Prepare("update users set password = ? where id = ?")
+	if error != nil {
+		return error
+	}
+	defer statement.Close()
+
+	_, error = statement.Exec(newHashedPassword, userID)
+	if error != nil {
+		return error
+	}
+	return nil
 }
 
 // Create inserts a new user in the database

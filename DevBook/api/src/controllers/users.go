@@ -6,6 +6,7 @@ import (
 	"api/src/models"
 	"api/src/repositories"
 	"api/src/responses"
+	"api/src/security"
 	"encoding/json"
 	"errors"
 	"io/ioutil"
@@ -365,4 +366,88 @@ func FetchFollowing(rw http.ResponseWriter, r *http.Request) {
 	}
 
 	responses.JSON(rw, http.StatusOK, userFollowing)
+}
+
+// UpdatePassword updates a user password
+func UpdatePassword(rw http.ResponseWriter, r *http.Request) {
+	// get user who wants to update password
+	loggedUserID, error := authentication.ExtractUserId(r)
+	if error != nil {
+		responses.Error(rw, http.StatusUnauthorized, error)
+		return
+	}
+
+	// getting user ID path parameter
+	parameters := mux.Vars(r)
+	userID, error := strconv.ParseUint(parameters["id"], 10, 64)
+	if error != nil {
+		responses.Error(rw, http.StatusBadRequest, error)
+		return
+	}
+
+	// comparing logged user with user ID in the path parameter
+	if loggedUserID != userID {
+		responses.Error(rw, http.StatusForbidden, errors.New("it's not possible to update the password for another user"))
+	}
+
+	// reading request body containing new password
+	// {
+	//    "newPassword": "xyz",
+	//    "currentPassword": "abc"
+	// }
+	requestBody, error := ioutil.ReadAll(r.Body)
+	if error != nil {
+		responses.Error(rw, http.StatusBadRequest, error)
+		return
+	}
+
+	// unmarshal request body to our PasswordReset
+	var passwordReset models.PasswordReset
+	if error := json.Unmarshal(requestBody, &passwordReset); error != nil {
+		responses.Error(rw, http.StatusBadRequest, error)
+		return
+	}
+
+	// we need to open connection to database fetching the user to check if the password is right
+	db, error := database.Connect()
+	if error != nil {
+		responses.Error(rw, http.StatusInternalServerError, error)
+		return
+	}
+	defer db.Close()
+
+	// let's check if currentPassword really matches what we have in the database
+	userRepository := repositories.NewUsersRepository(db)
+	userDatabaseHashedPassword, error := userRepository.FetchUserHashedPasswordByID(userID)
+	if error != nil {
+		responses.Error(rw, http.StatusInternalServerError, error)
+		return
+	}
+
+	// userDatabasePassword is hashed. Let's compare by using BCrypt
+	if error = security.CheckPassword(passwordReset.CurrentPassword, userDatabaseHashedPassword); error != nil {
+		responses.Error(rw, http.StatusUnauthorized, errors.New("informed password does not match user's password"))
+		return
+	}
+
+	// now we know user password matches what we have in the database
+	newHashedPassword, error := security.Hash(passwordReset.NewPassword)
+	if error != nil {
+		responses.Error(rw, http.StatusBadRequest, error)
+		return
+	}
+
+	// validating if current password == new password (makes no sense)
+	if passwordReset.CurrentPassword == passwordReset.NewPassword {
+		responses.Error(rw, http.StatusBadRequest, errors.New("new password should be different from your current password"))
+	}
+
+	// now we need to update the password
+	if error = userRepository.UpdatePassword(userID, string(newHashedPassword)); error != nil {
+		responses.Error(rw, http.StatusInternalServerError, error)
+		return
+	}
+
+	// if everything is ok
+	responses.JSON(rw, http.StatusNoContent, nil)
 }
