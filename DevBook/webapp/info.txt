@@ -1,0 +1,23 @@
+APP - DevBook (consume our REST API)
+* [FE] -> BE -> Database
+
+[App Structure]
+
+Folders and packages:
+    - main packages (main, router, controllers, models)
+    - helper (config, cookies, middleware, requests, responses, utils)
+    - assets (js and css)
+    - views (html)
+
+[Starting module]
+go mod init webapp
+
+[Dependencies]
+go get github.com/gorilla/mux
+
+[Running app]
+either: go run main.go
+or: go run webapp (the name of the module)
+
+[Views]
+generate a html template by typing "doc"
