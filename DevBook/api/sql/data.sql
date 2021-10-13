@@ -11,3 +11,9 @@ insert into user_followers(user_id, follower_user_id) values
     (2, 1),
     (2, 3),
     (3, 4);
+
+insert into posts(title, content, author_id) values
+("Post from John", "This is a post from John!", 1),
+("Post from Jane", "This is a post from Jane!", 2),
+("Post from Paul", "This is a post from Paul!", 3),
+("Post from Peter", "This is a post from Peter!", 4);
