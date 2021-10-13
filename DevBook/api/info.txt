@@ -34,3 +34,7 @@ API - DevBook
 - mail validation: go get github.com/badoux/checkmail
 - BCrypt: go get golang.org/x/crypto/bcrypt
 - JWT authentication: go get github.com/dgrijalva/jwt-go
+
+[Running faster to be used by FE]
+go build
+./api
