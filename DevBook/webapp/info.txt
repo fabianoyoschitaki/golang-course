@@ -21,3 +21,7 @@ or: go run webapp (the name of the module)
 
 [Views]
 generate a html template by typing "doc"
+
+[JQuery]
+https://jquery.com/download
+https://code.jquery.com/jquery-3.6.0.min.js
