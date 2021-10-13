@@ -100,3 +100,96 @@ func (repo *Posts) FetchPosts(userID uint64) ([]models.Post, error) {
 	}
 	return posts, nil
 }
+
+// UpdatePost updates an existing post
+func (repo *Posts) UpdatePost(postID uint64, postToUpdate models.Post) error {
+	statement, error := repo.db.Prepare("update posts set title = ?, content = ? where id = ?")
+	if error != nil {
+		return error
+	}
+	defer statement.Close()
+
+	if _, error = statement.Exec(postToUpdate.Title, postToUpdate.Content, postID); error != nil {
+		return error
+	}
+	return nil
+}
+
+// FetchPostByUserID fetch posts of a specific user
+func (repo *Posts) FetchPostByUserID(userID uint64) ([]models.Post, error) {
+	rows, error := repo.db.Query(`
+		select p.id, p.title, p.content, p.likes, p.created_at, p.author_id, u.nick from posts p 
+		join users u on p.author_id = u.id where p.author_id = ?
+	`, userID)
+	if error != nil {
+		return nil, error
+	}
+	defer rows.Close()
+
+	var userPosts []models.Post
+	for rows.Next() {
+		var userPost models.Post
+		if error = rows.Scan(
+			&userPost.ID,
+			&userPost.Title,
+			&userPost.Content,
+			&userPost.Likes,
+			&userPost.CreatedAt,
+			&userPost.AuthorID,
+			&userPost.AuthorNick,
+		); error != nil {
+			return nil, error
+		}
+		userPosts = append(userPosts, userPost)
+	}
+	return userPosts, nil
+}
+
+// DeletePost deletes a post from database
+func (repo *Posts) DeletePost(postID uint64) error {
+	statement, error := repo.db.Prepare("delete from posts where id = ?")
+	if error != nil {
+		return error
+	}
+	defer statement.Close()
+
+	if _, error = statement.Exec(postID); error != nil {
+		return error
+	}
+	return nil
+}
+
+// LikePost adds a like to a post
+func (repo *Posts) LikePost(postID uint64) error {
+	statement, error := repo.db.Prepare("update posts set likes = likes + 1 where id = ?")
+	if error != nil {
+		return error
+	}
+	defer statement.Close()
+
+	if _, error = statement.Exec(postID); error != nil {
+		return error
+	}
+	return nil
+}
+
+// UnlikePost adds a like to a post
+func (repo *Posts) UnlikePost(postID uint64) error {
+	statement, error := repo.db.Prepare(`
+		update posts set likes = 
+		CASE 
+			WHEN likes > 0 THEN likes - 1
+			ELSE 0 
+		END
+		where id = ?
+	`)
+	if error != nil {
+		return error
+	}
+	defer statement.Close()
+
+	if _, error = statement.Exec(postID); error != nil {
+		return error
+	}
+	return nil
+}

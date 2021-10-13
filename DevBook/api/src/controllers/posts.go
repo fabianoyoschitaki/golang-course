@@ -7,6 +7,7 @@ import (
 	"api/src/repositories"
 	"api/src/responses"
 	"encoding/json"
+	"errors"
 	"io/ioutil"
 	"net/http"
 	"strconv"
@@ -120,10 +121,188 @@ func FetchPost(rw http.ResponseWriter, r *http.Request) {
 
 // UpdatePost updates an existing post
 func UpdatePost(rw http.ResponseWriter, r *http.Request) {
+	// get logged user ID
+	userID, error := authentication.ExtractUserId(r)
+	if error != nil {
+		responses.Error(rw, http.StatusUnauthorized, error)
+		return
+	}
+
+	// get post ID
+	parameters := mux.Vars(r)
+	postID, error := strconv.ParseUint(parameters["postId"], 10, 64)
+	if error != nil {
+		responses.Error(rw, http.StatusBadRequest, error)
+		return
+	}
+
+	// we need to open database connection to make sure the post ID comes from user ID
+	db, error := database.Connect()
+	if error != nil {
+		responses.Error(rw, http.StatusInternalServerError, error)
+		return
+	}
+	defer db.Close()
+
+	postRepository := repositories.NewPostsRepository(db)
+	postFromDatabase, error := postRepository.FetchPostByID(postID)
+	if error != nil {
+		responses.Error(rw, http.StatusInternalServerError, error)
+		return
+	}
+
+	// checking if it's different from user
+	if postFromDatabase.AuthorID != userID {
+		responses.Error(rw, http.StatusForbidden, errors.New("it's not possible to update a post you don't own"))
+		return
+	}
+
+	// now that we know user is the owner of post, we can read the request body and update the post
+	requestBody, error := ioutil.ReadAll(r.Body)
+	if error != nil {
+		responses.Error(rw, http.StatusUnprocessableEntity, error)
+		return
+	}
+
+	var postToBeUpdated models.Post
+	if error = json.Unmarshal(requestBody, &postToBeUpdated); error != nil {
+		responses.Error(rw, http.StatusBadRequest, error)
+		return
+	}
+
+	// validating business rules
+	if error = postToBeUpdated.Prepare(); error != nil {
+		responses.Error(rw, http.StatusBadRequest, error)
+		return
+	}
+
+	if error = postRepository.UpdatePost(postID, postToBeUpdated); error != nil {
+		responses.Error(rw, http.StatusInternalServerError, error)
+		return
+	}
+
+	responses.JSON(rw, http.StatusNoContent, nil)
 
 }
 
 // DeletePost deletes an existing post
 func DeletePost(rw http.ResponseWriter, r *http.Request) {
+	// get logged user ID
+	userID, error := authentication.ExtractUserId(r)
+	if error != nil {
+		responses.Error(rw, http.StatusUnauthorized, error)
+		return
+	}
 
+	// get post ID
+	parameters := mux.Vars(r)
+	postID, error := strconv.ParseUint(parameters["postId"], 10, 64)
+	if error != nil {
+		responses.Error(rw, http.StatusBadRequest, error)
+		return
+	}
+
+	// we need to open database connection to make sure the post ID comes from user ID
+	db, error := database.Connect()
+	if error != nil {
+		responses.Error(rw, http.StatusInternalServerError, error)
+		return
+	}
+	defer db.Close()
+
+	postRepository := repositories.NewPostsRepository(db)
+	postFromDatabase, error := postRepository.FetchPostByID(postID)
+	if error != nil {
+		responses.Error(rw, http.StatusInternalServerError, error)
+		return
+	}
+
+	// checking if it's different from user
+	if postFromDatabase.AuthorID != userID {
+		responses.Error(rw, http.StatusForbidden, errors.New("it's not possible to delete a post you don't own"))
+		return
+	}
+
+	if error = postRepository.DeletePost(postID); error != nil {
+		responses.Error(rw, http.StatusInternalServerError, error)
+		return
+	}
+
+	responses.JSON(rw, http.StatusNoContent, nil)
+}
+
+// FetchPostsByUser fetches all posts by user
+func FetchPostsByUser(rw http.ResponseWriter, r *http.Request) {
+	parameters := mux.Vars(r)
+	userID, error := strconv.ParseUint(parameters["userId"], 10, 64)
+	if error != nil {
+		responses.Error(rw, http.StatusBadRequest, error)
+		return
+	}
+
+	db, error := database.Connect()
+	if error != nil {
+		responses.Error(rw, http.StatusInternalServerError, error)
+		return
+	}
+	defer db.Close()
+
+	postRepository := repositories.NewPostsRepository(db)
+	userPosts, error := postRepository.FetchPostByUserID(userID)
+	if error != nil {
+		responses.Error(rw, http.StatusInternalServerError, error)
+		return
+	}
+
+	responses.JSON(rw, http.StatusOK, userPosts)
+}
+
+// LikePost adds a like to a post
+func LikePost(rw http.ResponseWriter, r *http.Request) {
+	parameters := mux.Vars(r)
+	postID, error := strconv.ParseUint(parameters["postId"], 10, 64)
+	if error != nil {
+		responses.Error(rw, http.StatusBadRequest, error)
+		return
+	}
+
+	db, error := database.Connect()
+	if error != nil {
+		responses.Error(rw, http.StatusInternalServerError, error)
+		return
+	}
+	defer db.Close()
+
+	postRepository := repositories.NewPostsRepository(db)
+	if error = postRepository.LikePost(postID); error != nil {
+		responses.Error(rw, http.StatusInternalServerError, error)
+		return
+	}
+
+	responses.JSON(rw, http.StatusNoContent, nil)
+}
+
+// UnlikePost removes a like to a post
+func UnlikePost(rw http.ResponseWriter, r *http.Request) {
+	parameters := mux.Vars(r)
+	postID, error := strconv.ParseUint(parameters["postId"], 10, 64)
+	if error != nil {
+		responses.Error(rw, http.StatusBadRequest, error)
+		return
+	}
+
+	db, error := database.Connect()
+	if error != nil {
+		responses.Error(rw, http.StatusInternalServerError, error)
+		return
+	}
+	defer db.Close()
+
+	postRepository := repositories.NewPostsRepository(db)
+	if error = postRepository.UnlikePost(postID); error != nil {
+		responses.Error(rw, http.StatusInternalServerError, error)
+		return
+	}
+
+	responses.JSON(rw, http.StatusNoContent, nil)
 }
