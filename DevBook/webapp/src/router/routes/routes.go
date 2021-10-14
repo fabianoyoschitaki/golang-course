@@ -1,8 +1,9 @@
 package routes
 
 import (
-	"fmt"
+	"log"
 	"net/http"
+	"webapp/src/middlewares"
 
 	"github.com/gorilla/mux"
 )
@@ -18,12 +19,17 @@ type Route struct {
 // Configure adds all routes inside router
 func Configure(router *mux.Router) *mux.Router {
 
-	routes := loginRoutes                  // login routes
-	routes = append(routes, userRoutes...) // users routes
+	routes := loginRoutes                     // login routes
+	routes = append(routes, userRoutes...)    // users routes
+	routes = append(routes, homepageRoute...) // home page route
 
 	for _, route := range routes {
-		fmt.Printf("Route %s configured\n", route.URI)
-		router.HandleFunc(route.URI, route.Function).Methods(route.Method)
+		if route.RequiresAuthentication {
+			router.HandleFunc(route.URI, middlewares.Logger(middlewares.Authenticate(route.Function))).Methods(route.Method)
+		} else {
+			router.HandleFunc(route.URI, middlewares.Logger(route.Function)).Methods(route.Method)
+		}
+		log.Printf("Route %s %s auth: %t configured\n", route.Method, route.URI, route.RequiresAuthentication)
 	}
 
 	// we need to serve our css and js files

@@ -14,6 +14,8 @@ go mod init webapp
 
 [Dependencies]
 go get github.com/gorilla/mux
+go get github.com/joho/godotenv
+go get github.com/gorilla/securecookie
 
 [Running app]
 either: go run main.go
@@ -25,3 +27,28 @@ generate a html template by typing "doc"
 [JQuery]
 https://jquery.com/download
 https://code.jquery.com/jquery-3.6.0.min.js
+
+[Environment Variables]
+- config package + .env file
+- go get github.com/joho/godotenv
+
+[Cookies]
+- go get github.com/gorilla/securecookie
+save auth data inside cookie
+func init() {
+	hashKey := securecookie.GenerateRandomKey(16)
+	fmt.Println(hex.EncodeToString(hashKey))
+
+	blockKey := securecookie.GenerateRandomKey(16)
+	fmt.Println(hex.EncodeToString(blockKey))
+}
+
+[Bootstrap]
+https://getbootstrap.com/
+css and js folders. 
+- copy to css folder: bootstrap.css and bootstrap.css.map
+- copy to js folder: bootstrap.js and bootstrap.js.map
+
+home.html: 
+    https://getbootstrap.com/docs/4.5/components/navbar/#toggler
+    https://getbootstrap.com/docs/4.5/components/jumbotron/

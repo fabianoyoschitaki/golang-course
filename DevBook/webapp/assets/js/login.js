@@ -13,7 +13,6 @@ function attemptLogin(event){
         }
     }).done(function(data){ // http 20X
         console.log("Login was successful!");
-        console.log(data)
         // let's redirect the user to his feed
         window.location = "/home";
     }).fail(function(error){ // http 40X, 50X

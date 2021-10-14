@@ -3,7 +3,9 @@ package controllers
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"net/http"
+	"webapp/src/config"
 	"webapp/src/responses"
 )
 
@@ -30,7 +32,8 @@ func CreateUser(rw http.ResponseWriter, r *http.Request) {
 
 	// make the request to our backend API
 	// if http == 400 or 500, error is nil, because the request was successful! this error means we could not make the request complete
-	response, error := http.Post("http://localhost:5000/users", "application/json", bytes.NewBuffer(userToCreate))
+	APIUrl := fmt.Sprintf("%s/users", config.APIURL)
+	response, error := http.Post(APIUrl, "application/json", bytes.NewBuffer(userToCreate))
 	if error != nil {
 		// we cannot use response.statusCode because if error != nil, response doesn't have it! (nil)
 		responses.JSON(rw, http.StatusInternalServerError, responses.APIError{Error: error.Error()})
