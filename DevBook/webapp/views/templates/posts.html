@@ -1,0 +1,51 @@
+<!-- post header used by either types of posts-->
+{{ define "post-header" }}
+    <h1 class="display-4">{{ .Title }}</h1>
+    <p class="lead">{{ .Content }}</p>
+    <!-- #IMPORTANT time.Time can be formatted t.Format("pattern") 02 = month, 01 = day, 2006 = year -->
+    <!-- GO has a reference date: Jan 2 15:04:05 2006 (1 2 3 4 5 6 magic numbers)-->
+    <a href="#">{{ .AuthorNick }} - posted at {{ .CreatedAt.Format "02/01/2006 3:4" }}</a>
+    <hr class="my-4">
+{{ end }}
+
+<!-- number of post likes -->
+{{ define "likes" }}
+<i class="fas fa-heart like-post"></i>
+<span> {{ .Likes }} </span>
+{{ end }}
+
+<!-- edit post -->
+{{ define "edit-post" }}
+<a href="/edit-post" style="text-decoration: none;"> <!-- remove link appearance -->
+    <i class="fas fa-edit"></i>
+</a>
+{{ end }}
+
+<!-- delete post -->
+{{ define "delete-post" }}
+<a href="/delete-post" style="text-decoration: none;">
+    <i class="fas fa-trash text-danger"></i> <!-- text-danger is a bootstrap class to make it red -->
+</a>
+{{ end }}
+
+<!-- post from logged user -->
+{{ define "post-from-logged-user" }}
+    <div class="jumbotron" data-post-id="{{ .ID }}">
+        {{ template "post-header" . }}
+        <p>
+            {{ template "likes" . }}
+            {{ template "edit-post" . }}
+            {{ template "delete-post" . }}
+        </p>
+    </div>
+{{ end }}
+
+<!-- post from another user -->
+{{ define "post-from-another-user" }}
+    <div class="jumbotron" data-post-id="{{ .ID }}">
+        {{ template "post-header" . }}
+        <p>
+            {{ template "likes" . }}
+        </p>
+    </div>
+{{ end }}

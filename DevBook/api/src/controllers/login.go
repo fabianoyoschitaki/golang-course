@@ -10,6 +10,7 @@ import (
 	"encoding/json"
 	"io/ioutil"
 	"net/http"
+	"strconv"
 )
 
 // Login is responsible to authenticate a user within API
@@ -56,5 +57,15 @@ func Login(rw http.ResponseWriter, r *http.Request) {
 		responses.Error(rw, http.StatusInternalServerError, error)
 		return
 	}
-	rw.Write([]byte(token))
+
+	// convert to string
+	userID := strconv.FormatUint(userFromDatabase.ID, 10)
+
+	// we write AuthenticationData to the response:
+	// { "token" : "<jwt>", "id": <user ID> }
+	// rw.Write([]byte(token)) // this saves the raw JWT
+	responses.JSON(rw, http.StatusOK, models.AuthenticationData{
+		Token: token,
+		ID:    userID,
+	})
 }

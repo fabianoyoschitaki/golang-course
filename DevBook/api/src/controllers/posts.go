@@ -9,6 +9,7 @@ import (
 	"encoding/json"
 	"errors"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"strconv"
 
@@ -87,6 +88,7 @@ func FetchPosts(rw http.ResponseWriter, r *http.Request) {
 
 	postRepository := repositories.NewPostsRepository(db)
 	posts, error := postRepository.FetchPosts(userID)
+	log.Printf("Fetching posts for user %d: %d posts", userID, len(posts))
 	if error != nil {
 		responses.Error(rw, http.StatusInternalServerError, error)
 		return

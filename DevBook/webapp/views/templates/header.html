@@ -1,0 +1,29 @@
+{{ define "header"}}
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <a class="navbar-brand" href="#">DevBook</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbar-main"
+            aria-controls="navbar-main" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+    
+        <div class="collapse navbar-collapse" id="navbar-main">
+            <ul class="navbar-nav mr-auto mt-2 mt-lg-0">
+                <li class="nav-item active">
+                    <a class="nav-link" href="/home">Home <span class="sr-only">(current)</span></a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/profile">My Profile</a>
+                </li>
+                <li class="nav-item">
+                    <form class="form-inline my-2 my-lg-0" action="/fetch-users" method="GET">
+                        <input class="form-control mr-sm-2" type="search" placeholder="Search Users" id="user-search" name="user-search" required="required">
+                    </form>
+                </li>
+            </ul>
+            
+            <span class="navbar-text p-0">
+                <a href="/logout">Logout</a>
+            </span>
+        </div>
+    </nav>
+    {{ end }}

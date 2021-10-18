@@ -52,3 +52,12 @@ css and js folders.
 home.html: 
     https://getbootstrap.com/docs/4.5/components/navbar/#toggler
     https://getbootstrap.com/docs/4.5/components/jumbotron/
+
+[Date]
+#IMPORTANT time.Time can be formatted t.Format("pattern") 02 = month, 01 = day, 2006 = year
+GO has a reference date: Jan 2 15:04:05 2006 (1 2 3 4 5 6 magic numbers)
+
+[Font-Awesome]
+https://fontawesome.com/kits
+click your kit https://fontawesome.com/kits/20d7b9b00f/use
+copy link and add to scripts.html

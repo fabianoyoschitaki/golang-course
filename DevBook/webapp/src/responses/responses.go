@@ -15,9 +15,13 @@ func JSON(rw http.ResponseWriter, statusCode int, data interface{}) {
 	rw.Header().Set("Content-Type", "application/json")
 	rw.WriteHeader(statusCode)
 
-	// writes data JSON to response
-	if error := json.NewEncoder(rw).Encode(data); error != nil {
-		log.Fatal(error)
+	// #IMPORTANT http: request method or response status code does not allow body
+	// This is because data might be nil
+	if data != nil {
+		// writes data JSON to response
+		if error := json.NewEncoder(rw).Encode(data); error != nil {
+			log.Fatal(error)
+		}
 	}
 }
 

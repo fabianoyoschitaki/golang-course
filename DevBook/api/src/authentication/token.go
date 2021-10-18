@@ -4,6 +4,7 @@ import (
 	"api/src/config"
 	"errors"
 	"fmt"
+	"log"
 	"net/http"
 	"strconv"
 	"strings"
@@ -30,6 +31,7 @@ func CreateToken(ID uint64) (string, error) {
 // ValidateToken validates if request token is valid
 func ValidateToken(r *http.Request) error {
 	tokenString := extractToken(r)
+	log.Printf("Validating token: %s", tokenString)
 
 	// let's convert it to JWT (header, claims and signature)
 	token, error := jwt.Parse(tokenString, returnVerificationKey)

@@ -16,6 +16,9 @@ var templates *template.Template
 func LoadTemplates() {
 	// pointing where our HTML files are
 	templates = template.Must(template.ParseGlob("views/*.html"))
+
+	// adding to our templates more templates (the ones which are actually templates)
+	templates = template.Must(templates.ParseGlob("views/templates/*.html"))
 }
 
 // RenderTemplate renders a specific template with actual data

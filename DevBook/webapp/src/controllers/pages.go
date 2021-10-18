@@ -5,8 +5,10 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"strconv"
 	"time"
 	"webapp/src/config"
+	"webapp/src/cookies"
 	"webapp/src/models"
 	"webapp/src/requests"
 	"webapp/src/responses"
@@ -54,13 +56,20 @@ func LoadHomepage(rw http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// we don't need the error because if we're here, we've passed through the middleware.
+	cookie, _ := cookies.ReadCookie(r)
+	userID, _ := strconv.ParseUint(cookie["id"], 10, 64)
+	log.Printf("User ID from cookie is: %d\n", userID)
+
 	// we render the page passing the userPosts. this is a slice
 	// utils.RenderTemplate(rw, "home.html", userPosts) // this could be used, but let's make a way to pass more parameters
 	utils.RenderTemplate(rw, "home.html", struct {
-		Posts []models.Post
-		Now   time.Time
+		Posts        []models.Post
+		LoggedUserID uint64
+		Now          time.Time
 	}{
-		Posts: userPosts,
-		Now:   time.Now(),
+		Posts:        userPosts,
+		LoggedUserID: userID,
+		Now:          time.Now(),
 	})
 }
