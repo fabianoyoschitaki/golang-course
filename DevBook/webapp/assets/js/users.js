@@ -1,7 +1,9 @@
 // This is for users.html page.
-
 $("#follow").on('click', follow);
 $("#unfollow").on('click', unfollow);
+
+// This is from edit-profile.html page
+$("#edit-profile-form").on('submit', editProfile);
 
 function unfollow(){
     console.log("Unfollow");
@@ -32,5 +34,27 @@ function follow(){
     }).fail(function(){
         Swal.fire('Oops...', 'Error to follow user!', 'error');
         $("#follow").prop('disabled', false);
+    })
+}
+
+// we need event to prevent default
+function editProfile(event){
+    event.preventDefault();
+    console.log("Editing profile...");
+    $.ajax({
+        url: '/edit-profile',
+        method: 'PUT',
+        data: {
+            newName: $('#new-name').val(),
+            newEmail: $('#new-email').val(),
+            newNick: $('#new-nick').val(),
+        }
+    }).done(function(){
+        Swal.fire('Success!', 'User data was successfully updated!', 'success')
+            .then(function(){
+                window.location = '/profile';
+            });
+    }).fail(function(){
+        Swal.fire('Oops...', 'Error to update profile :(', 'error');
     })
 }

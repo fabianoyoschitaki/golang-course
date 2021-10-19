@@ -26,12 +26,14 @@
                             {{ .UserComplete.Name }} - {{ .UserComplete.Nick }} - Member Since {{ .UserComplete.CreatedAt.Format "02/01/2006" }}
                         </h6>
                         <p class="card-text">
-                            <a href="#">
+                            <!-- #MODAL-FOLLOWERS (/templates/modal-followers.html) -->
+                            <a href="#" data-toggle="modal" data-target="#modal-followers-x">
                                 Followers: {{ len .UserComplete.Followers }}
                             </a>
                         </p>
                         <p class="card-text">
-                            <a href="#">
+                            <!-- #MODAL-FOLLOWING (/templates/modal-following.html) -->
+                            <a href="#"  data-toggle="modal" data-target="#modal-following-y">
                                 Following: {{ len .UserComplete.Following }}
                             </a>
                         </p>
@@ -69,6 +71,9 @@
             </div>
         </div>
     </div>
+    <!-- #MODAL-FOLLOWERS -->
+    {{ template "modal-followers" .UserComplete }}
+    {{ template "modal-following" .UserComplete }}
     {{ template "footer" }}
     {{ template "scripts" }}
     <!-- to make post "like/unlike" -->

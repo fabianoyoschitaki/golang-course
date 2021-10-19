@@ -4,7 +4,7 @@
     <p class="lead">{{ .Content }}</p>
     <!-- #IMPORTANT time.Time can be formatted t.Format("pattern") 02 = month, 01 = day, 2006 = year -->
     <!-- GO has a reference date: Jan 2 15:04:05 2006 (1 2 3 4 5 6 magic numbers)-->
-    <a href="#">{{ .AuthorNick }} - posted at {{ .CreatedAt.Format "02/01/2006 3:4" }}</a>
+    <a href="/users/{{ .AuthorID }}">{{ .AuthorNick }} - posted at {{ .CreatedAt.Format "02/01/2006 3:4" }}</a>
     <hr class="my-4">
 {{ end }}
 

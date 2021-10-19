@@ -1,0 +1,77 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DevBook - My Profile</title>
+    <link href="/assets/css/bootstrap.css" rel="stylesheet"/>
+</head>
+<body>
+    {{ template "header" }}
+
+    <div class="container-fluid">
+        <!-- self data -->
+        <div class="row mt-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">My Profile</h5>
+                        <h6 class="card-subtitle mb-2 text-muted">
+                            {{ .Name }} - {{ .Nick }} - Member Since {{ .CreatedAt.Format "02/01/2006" }}
+                        </h6>
+                        <p class="card-text">
+                            <!-- #MODAL-FOLLOWERS (/templates/modal-followers.html) -->
+                            <a href="#" data-toggle="modal" data-target="#modal-followers-x">
+                                Followers: {{ len .Followers }}
+                            </a>
+                        </p>
+                        <p class="card-text">
+                            <!-- #MODAL-FOLLOWING (/templates/modal-following.html) -->
+                            <a href="#"  data-toggle="modal" data-target="#modal-following-y">
+                                Following: {{ len .Following }}
+                            </a>
+                        </p>
+
+                        <div class="row">
+                            <div class="col-12">
+                                <a href="/edit-profile" class="card-link">
+                                    <button class="btn btn-info">Edit Profile</button>
+                                </a>
+                                <a href="/change-password" class="card-link">
+                                    <button class="btn btn-info">Change Password</button>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- posts -->
+        <div class="row mt-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">My Posts</h5>
+                        <p class="card-text">
+                            {{ range .Posts }}
+                                {{ template "post-from-logged-user" . }}
+                            {{ else }}
+                                <p class="text-muted text-center">No posts for now...</p>
+                            {{ end }}
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    {{ template "footer" }}
+
+    {{ template "modal-followers" . }}
+    {{ template "modal-following" . }}
+
+    {{ template "scripts" }}
+    <script src="/assets/js/posts.js"></script>
+</body>
+</html>

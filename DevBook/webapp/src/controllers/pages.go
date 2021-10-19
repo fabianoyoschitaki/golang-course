@@ -164,11 +164,22 @@ func LoadHomepage(rw http.ResponseWriter, r *http.Request) {
 // #IMPORTANT: we get userID and make 4 concurrent requests to the API: user data, posts, followers, following
 // LoadUserProfilePage loads a user profile page
 func LoadUserProfilePage(rw http.ResponseWriter, r *http.Request) {
-	// get post id
+	// get query parameter userId
 	parameters := mux.Vars(r)
 	userID, error := strconv.ParseUint(parameters["userId"], 10, 64)
 	if error != nil {
 		responses.JSON(rw, http.StatusBadRequest, responses.APIError{Error: error.Error()})
+		return
+	}
+
+	// we want to see if userComplete.followers "contains" loggedUser. if not, then we create a "Follow" button or "Unfollow" otherwise
+	cookie, _ := cookies.ReadCookie(r)
+	loggedUserID, _ := strconv.ParseUint(cookie["id"], 10, 64)
+	log.Printf("Logged user is: %d", loggedUserID)
+
+	// if user being fetched is the same as the logged user ID, then we redirect to /profile instead of /user
+	if loggedUserID == userID {
+		http.Redirect(rw, r, "/profile", http.StatusFound)
 		return
 	}
 
@@ -179,11 +190,6 @@ func LoadUserProfilePage(rw http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// we want to see if userComplete.followers "contains" loggedUser. if not, then we create a "Follow" button or "Unfollow" otherwise
-	cookie, _ := cookies.ReadCookie(r)
-	loggedUserID, _ := strconv.ParseUint(cookie["id"], 10, 64)
-	log.Printf("Logged user is: %d", loggedUserID)
-
 	// we return the complete user of the profile we're visiting and also the logged User ID to create the "follow/unfollow" feature
 	utils.RenderTemplate(rw, "user.html", struct {
 		UserComplete models.User
@@ -192,4 +198,47 @@ func LoadUserProfilePage(rw http.ResponseWriter, r *http.Request) {
 		UserComplete: userComplete,
 		LoggedUserID: loggedUserID,
 	})
+}
+
+// LoadLoggedUserProfilePage loads profile page
+func LoadLoggedUserProfilePage(rw http.ResponseWriter, r *http.Request) {
+
+	// get logged user ID
+	cookie, _ := cookies.ReadCookie(r)
+	loggedUserID, _ := strconv.ParseUint(cookie["id"], 10, 64)
+	log.Printf("Logged user is: %d", loggedUserID)
+
+	// we search for the complete user by userID and the Request r. We use r because we need to use the authenticated token to call the API
+	userComplete, error := models.FetchCompleteUser(loggedUserID, r)
+	if error != nil {
+		responses.JSON(rw, http.StatusInternalServerError, responses.APIError{Error: error.Error()})
+		return
+	}
+
+	// we return the complete user of the profile
+	utils.RenderTemplate(rw, "profile.html", userComplete)
+}
+
+// LoadEditProfilePage loads edit profile page
+func LoadEditProfilePage(rw http.ResponseWriter, r *http.Request) {
+
+	// get logged user ID
+	cookie, _ := cookies.ReadCookie(r)
+	loggedUserID, _ := strconv.ParseUint(cookie["id"], 10, 64)
+	log.Printf("Logged user is: %d", loggedUserID)
+
+	// let's reuse channel to fetch user data. It's not common to use
+	// a channel if there are no other concurrent task, but let's use it instead of creating another function
+	userDataChannel := make(chan models.User)
+	go models.FetchUserData(userDataChannel, loggedUserID, r)
+	user := <-userDataChannel
+
+	// it means we had an error
+	if user.ID == 0 {
+		responses.JSON(rw, http.StatusInternalServerError, responses.APIError{Error: "error when fetching user data"})
+		return
+	}
+
+	// now we can load the page with the user from channel
+	utils.RenderTemplate(rw, "edit-profile.html", user)
 }

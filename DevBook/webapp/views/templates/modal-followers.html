@@ -1,0 +1,23 @@
+<!-- Search usage by: #MODAL-FOLLOWERS -->
+{{ define "modal-followers" }}
+<div class="modal fade" id="modal-followers-x">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <!-- we can have header, body and footer -->
+            <div class="modal-header">
+                <h2>Followers</h2>
+            </div>
+            <div class="modal-body">
+                {{ range .Followers }}
+                    <a href="/users/{{ .ID }}">{{ .Nick }}</a> <br/>
+                {{ else }}
+                    <p class="text-muted text-center">
+                        No followers...
+                    </p>
+                {{ end }}
+            </div>
+            <!-- no modal-footer ... -->
+        </div>
+    </div>
+</div>
+{{ end }}
