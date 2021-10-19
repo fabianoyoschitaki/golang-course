@@ -17,7 +17,9 @@ func JSON(rw http.ResponseWriter, statusCode int, data interface{}) {
 
 	// #IMPORTANT http: request method or response status code does not allow body
 	// This is because data might be nil
-	if data != nil {
+	// if data != nil { this is a bad check
+
+	if statusCode != http.StatusNoContent {
 		// writes data JSON to response
 		if error := json.NewEncoder(rw).Encode(data); error != nil {
 			log.Fatal(error)

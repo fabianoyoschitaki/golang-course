@@ -105,3 +105,70 @@ func CreatePost(rw http.ResponseWriter, r *http.Request) {
 	// we don't need to return anything (the new post), this is because our front-end javascript will reload the posts again (posts.js) window.location = "/home"
 	responses.JSON(rw, response.StatusCode, nil)
 }
+
+// UpdatePost updates an existing post
+func UpdatePost(rw http.ResponseWriter, r *http.Request) {
+
+	// getting postId to update
+	parameters := mux.Vars(r)
+	postID, error := strconv.ParseUint(parameters["postId"], 10, 64)
+	if error != nil {
+		responses.JSON(rw, http.StatusBadRequest, responses.APIError{Error: error.Error()})
+		return
+	}
+
+	// getting post data from request form values
+	r.ParseForm()
+	postUpdate, error := json.Marshal(map[string]string{
+		"title":   r.FormValue("title"),
+		"content": r.FormValue("content"),
+	})
+	if error != nil {
+		responses.JSON(rw, http.StatusBadRequest, responses.APIError{Error: error.Error()})
+		return
+	}
+
+	// making request to our API
+	updatePostUrl := fmt.Sprintf("%s/posts/%d", config.APIURL, postID)
+	response, error := requests.MakeRequestWithAuthenticationData(r, http.MethodPut, updatePostUrl, bytes.NewBuffer(postUpdate))
+	if error != nil {
+		responses.JSON(rw, http.StatusInternalServerError, responses.APIError{Error: error.Error()})
+		return
+	}
+	defer response.Body.Close()
+
+	if response.StatusCode >= 400 {
+		responses.HandleHttpResponseErrors(rw, response)
+		return
+	}
+
+	responses.JSON(rw, response.StatusCode, nil)
+}
+
+// DeletePost updates an existing post
+func DeletePost(rw http.ResponseWriter, r *http.Request) {
+
+	// getting postId to delete
+	parameters := mux.Vars(r)
+	postID, error := strconv.ParseUint(parameters["postId"], 10, 64)
+	if error != nil {
+		responses.JSON(rw, http.StatusBadRequest, responses.APIError{Error: error.Error()})
+		return
+	}
+
+	// making request to our API
+	deletePostUrl := fmt.Sprintf("%s/posts/%d", config.APIURL, postID)
+	response, error := requests.MakeRequestWithAuthenticationData(r, http.MethodDelete, deletePostUrl, nil)
+	if error != nil {
+		responses.JSON(rw, http.StatusInternalServerError, responses.APIError{Error: error.Error()})
+		return
+	}
+	defer response.Body.Close()
+
+	if response.StatusCode >= 400 {
+		responses.HandleHttpResponseErrors(rw, response)
+		return
+	}
+
+	responses.JSON(rw, response.StatusCode, nil)
+}

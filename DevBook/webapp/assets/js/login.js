@@ -17,6 +17,7 @@ function attemptLogin(event){
         window.location = "/home";
     }).fail(function(error){ // http 40X, 50X
         console.log(error);
-        alert("Fail to login :(");
+        // alert("Fail to login :(");
+        Swal.fire('Oops...', 'Email or password are incorrect!', 'error');
     })
 }

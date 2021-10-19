@@ -126,7 +126,8 @@ func (repo *Posts) FetchPostByUserID(userID uint64) ([]models.Post, error) {
 	}
 	defer rows.Close()
 
-	var userPosts []models.Post
+	// #IMPORTANT non nil slice (length 0)
+	userPosts := []models.Post{}
 	for rows.Next() {
 		var userPost models.Post
 		if error = rows.Scan(

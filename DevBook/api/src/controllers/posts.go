@@ -255,7 +255,7 @@ func FetchPostsByUser(rw http.ResponseWriter, r *http.Request) {
 		responses.Error(rw, http.StatusInternalServerError, error)
 		return
 	}
-
+	log.Println(userPosts == nil)
 	responses.JSON(rw, http.StatusOK, userPosts)
 }
 

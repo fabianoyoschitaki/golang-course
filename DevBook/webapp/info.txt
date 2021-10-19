@@ -61,3 +61,7 @@ GO has a reference date: Jan 2 15:04:05 2006 (1 2 3 4 5 6 magic numbers)
 https://fontawesome.com/kits
 click your kit https://fontawesome.com/kits/20d7b9b00f/use
 copy link and add to scripts.html
+
+[Sweet Alert]
+https://sweetalert2.github.io/
+<script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>

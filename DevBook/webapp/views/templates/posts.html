@@ -10,22 +10,21 @@
 
 <!-- number of post likes -->
 {{ define "likes" }}
-<i class="fas fa-heart like-post"></i>
+<i class="fas fa-heart like-post" style="cursor: pointer;"></i>
 <span> {{ .Likes }} </span>
 {{ end }}
 
 <!-- edit post -->
+<!-- {{ .ID }} works because we pass the post object in the post-from-logged-user template: {{ template "edit-post" . }} -->
 {{ define "edit-post" }}
-<a href="/edit-post" style="text-decoration: none;"> <!-- remove link appearance -->
+<a href="/posts/{{ .ID }}/update" style="text-decoration: none;"> <!-- remove link appearance -->
     <i class="fas fa-edit"></i>
 </a>
 {{ end }}
 
 <!-- delete post -->
 {{ define "delete-post" }}
-<a href="/delete-post" style="text-decoration: none;">
-    <i class="fas fa-trash text-danger"></i> <!-- text-danger is a bootstrap class to make it red -->
-</a>
+    <i class="fas fa-trash text-danger delete-post-icon" style="cursor: pointer;"></i> <!-- text-danger is a bootstrap class to make it red -->
 {{ end }}
 
 <!-- post from logged user -->

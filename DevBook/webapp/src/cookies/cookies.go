@@ -2,6 +2,7 @@ package cookies
 
 import (
 	"net/http"
+	"time"
 
 	"github.com/gorilla/securecookie"
 )
@@ -38,6 +39,18 @@ func ReadCookie(r *http.Request) (map[string]string, error) {
 	return cookieValues, nil
 }
 
+// DeleteCookie deletes cookie values in DEVBOOK_DATA
+func DeleteCookie(rw http.ResponseWriter) {
+	http.SetCookie(rw, &http.Cookie{
+		Name:     "DEVBOOK_DATA",
+		Value:    "",
+		Path:     "/",
+		HttpOnly: true,
+		Expires:  time.Unix(0, 0), // indicates it's expired
+	})
+}
+
+// SaveCookie saves DEVBOOK_DATA cookie
 func SaveCookie(rw http.ResponseWriter, ID, token string) error {
 	// creating data to be saved into cookie
 	data := map[string]string{

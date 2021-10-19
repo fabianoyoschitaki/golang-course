@@ -7,7 +7,7 @@ import (
 	"webapp/src/cookies"
 )
 
-// MakeRequestWithAuthenticationData is used to put the token in the request
+// MakeRequestWithAuthenticationData is used to put the token in the request to the backend API
 func MakeRequestWithAuthenticationData(webappRequestWithCookie *http.Request, method, url string, data io.Reader) (*http.Response, error) {
 
 	// create the actual request to be made to the authenticated API route

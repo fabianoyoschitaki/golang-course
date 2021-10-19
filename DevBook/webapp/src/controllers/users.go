@@ -5,8 +5,12 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"strconv"
 	"webapp/src/config"
+	"webapp/src/requests"
 	"webapp/src/responses"
+
+	"github.com/gorilla/mux"
 )
 
 // CreateUser calls backend API to create a new user
@@ -49,4 +53,54 @@ func CreateUser(rw http.ResponseWriter, r *http.Request) {
 
 	// we don't need to return the data from the API to the front-end
 	responses.JSON(rw, response.StatusCode, nil)
+}
+
+// UnfollowUser calls API to unfollow a user
+func UnfollowUser(rw http.ResponseWriter, r *http.Request) {
+	parameters := mux.Vars(r)
+	userToUnfollowID, error := strconv.ParseUint(parameters["userId"], 10, 64)
+	if error != nil {
+		responses.JSON(rw, http.StatusBadRequest, responses.APIError{Error: error.Error()})
+		return
+	}
+
+	unfollowUserAPIUrl := fmt.Sprintf("%s/users/%d/unfollow", config.APIURL, userToUnfollowID)
+	APIResponse, error := requests.MakeRequestWithAuthenticationData(r, http.MethodPost, unfollowUserAPIUrl, nil)
+	if error != nil {
+		responses.JSON(rw, http.StatusInternalServerError, responses.APIError{Error: error.Error()})
+		return
+	}
+	defer APIResponse.Body.Close()
+
+	if APIResponse.StatusCode >= 400 {
+		responses.HandleHttpResponseErrors(rw, APIResponse)
+		return
+	}
+
+	responses.JSON(rw, APIResponse.StatusCode, nil)
+}
+
+// FollowUser calls API to unfollow a user
+func FollowUser(rw http.ResponseWriter, r *http.Request) {
+	parameters := mux.Vars(r)
+	userToFollowID, error := strconv.ParseUint(parameters["userId"], 10, 64)
+	if error != nil {
+		responses.JSON(rw, http.StatusBadRequest, responses.APIError{Error: error.Error()})
+		return
+	}
+
+	followUserAPIUrl := fmt.Sprintf("%s/users/%d/follow", config.APIURL, userToFollowID)
+	APIResponse, error := requests.MakeRequestWithAuthenticationData(r, http.MethodPost, followUserAPIUrl, nil)
+	if error != nil {
+		responses.JSON(rw, http.StatusInternalServerError, responses.APIError{Error: error.Error()})
+		return
+	}
+	defer APIResponse.Body.Close()
+
+	if APIResponse.StatusCode >= 400 {
+		responses.HandleHttpResponseErrors(rw, APIResponse)
+		return
+	}
+
+	responses.JSON(rw, APIResponse.StatusCode, nil)
 }

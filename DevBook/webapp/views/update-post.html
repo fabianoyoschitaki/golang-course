@@ -1,0 +1,38 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DevBook - Update Post - {{ .Title }}</title>
+    <link rel="stylesheet" href="/assets/css/bootstrap.css">
+</head>
+<body>
+    {{ template "header" }}
+
+    <div class="container-fluid">
+        <div class="row mt-4">
+            <div class="col-12">
+                <h3>Update Post</h3>
+                <div class="form-group">
+                    <label for="title">Title</label>
+                    <input type="text" class="form-control" id="title" name="title" 
+                        placeholder="Enter new title" value="{{ .Title }}">
+                </div>
+                <div class="form-group">
+                    <label for="title">Content</label>
+                    <textarea class="form-control" id="content" name="content" 
+                        placeholder="Enter new content">{{ .Content }}</textarea>
+                </div>
+                <button id="btn-update-post" class="btn btn-info" data-post-id="{{ .ID }}">
+                    Save Changes
+                </button>
+            </div>
+        </div>
+    </div>
+
+    {{ template "footer" }}
+    {{ template "scripts" }}
+
+    <script src="/assets/js/posts.js"></script>
+</body>
+</html>
