@@ -55,4 +55,28 @@ var userRoutes = []Route{
 		Function:               controllers.LoadEditProfilePage,
 		RequiresAuthentication: true,
 	},
+	{
+		URI:                    "/edit-profile",
+		Method:                 http.MethodPut,
+		Function:               controllers.UpdateUser,
+		RequiresAuthentication: true,
+	},
+	{
+		URI:                    "/change-password",
+		Method:                 http.MethodGet,
+		Function:               controllers.LoadChangePasswordPage,
+		RequiresAuthentication: true,
+	},
+	{
+		URI:                    "/change-password",
+		Method:                 http.MethodPost,
+		Function:               controllers.UpdatePassword,
+		RequiresAuthentication: true,
+	},
+	{
+		URI:                    "/delete-user",
+		Method:                 http.MethodDelete,
+		Function:               controllers.DeleteUser,
+		RequiresAuthentication: true,
+	},
 }

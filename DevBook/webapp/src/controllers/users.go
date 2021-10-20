@@ -4,9 +4,11 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
 	"strconv"
 	"webapp/src/config"
+	"webapp/src/cookies"
 	"webapp/src/requests"
 	"webapp/src/responses"
 
@@ -90,17 +92,114 @@ func FollowUser(rw http.ResponseWriter, r *http.Request) {
 	}
 
 	followUserAPIUrl := fmt.Sprintf("%s/users/%d/follow", config.APIURL, userToFollowID)
-	APIResponse, error := requests.MakeRequestWithAuthenticationData(r, http.MethodPost, followUserAPIUrl, nil)
+	responseAPI, error := requests.MakeRequestWithAuthenticationData(r, http.MethodPost, followUserAPIUrl, nil)
 	if error != nil {
 		responses.JSON(rw, http.StatusInternalServerError, responses.APIError{Error: error.Error()})
 		return
 	}
-	defer APIResponse.Body.Close()
+	defer responseAPI.Body.Close()
 
-	if APIResponse.StatusCode >= 400 {
-		responses.HandleHttpResponseErrors(rw, APIResponse)
+	if responseAPI.StatusCode >= 400 {
+		responses.HandleHttpResponseErrors(rw, responseAPI)
 		return
 	}
 
-	responses.JSON(rw, APIResponse.StatusCode, nil)
+	responses.JSON(rw, responseAPI.StatusCode, nil)
+}
+
+// UpdateUser calls API to update a user
+func UpdateUser(rw http.ResponseWriter, r *http.Request) {
+
+	// getting user values to be updated
+	r.ParseForm()
+	newUserValues, error := json.Marshal(map[string]string{
+		"name":  r.FormValue("newName"), // they don't come from the form created at edit-profile.html, but from the JSON from users.js
+		"nick":  r.FormValue("newNick"),
+		"email": r.FormValue("newEmail"),
+	})
+	if error != nil {
+		responses.JSON(rw, http.StatusBadRequest, responses.APIError{Error: error.Error()})
+		return
+	}
+
+	// getting user ID to be updated
+	cookie, _ := cookies.ReadCookie(r)
+	userID, _ := strconv.ParseUint(cookie["id"], 10, 64)
+
+	// creating url and request to update user
+	updateUserAPIUrl := fmt.Sprintf("%s/users/%d", config.APIURL, userID)
+
+	// making request
+	log.Println(string(newUserValues))
+	responseAPI, error := requests.MakeRequestWithAuthenticationData(r, http.MethodPut, updateUserAPIUrl, bytes.NewBuffer(newUserValues))
+	if error != nil {
+		responses.JSON(rw, http.StatusInternalServerError, responses.APIError{Error: error.Error()})
+		return
+	}
+	defer responseAPI.Body.Close()
+
+	if responseAPI.StatusCode >= 400 {
+		responses.HandleHttpResponseErrors(rw, responseAPI)
+		return
+	}
+
+	responses.JSON(rw, responseAPI.StatusCode, nil)
+}
+
+// UpdatePassword calls API to update a user's password
+func UpdatePassword(rw http.ResponseWriter, r *http.Request) {
+
+	// getting user password values to be updated
+	r.ParseForm()
+	newPasswordValues, error := json.Marshal(map[string]string{
+		"newPassword":     r.FormValue("newPassword"),
+		"currentPassword": r.FormValue("currentPassword"),
+	})
+	if error != nil {
+		responses.JSON(rw, http.StatusBadRequest, responses.APIError{Error: error.Error()})
+		return
+	}
+
+	// getting user ID to be updated
+	cookie, _ := cookies.ReadCookie(r)
+	userID, _ := strconv.ParseUint(cookie["id"], 10, 64)
+
+	// creating url and request to update password
+	updateUserAPIUrl := fmt.Sprintf("%s/users/%d/password-reset", config.APIURL, userID)
+
+	// making request
+	responseAPI, error := requests.MakeRequestWithAuthenticationData(r, http.MethodPost, updateUserAPIUrl, bytes.NewBuffer(newPasswordValues))
+	if error != nil {
+		responses.JSON(rw, http.StatusInternalServerError, responses.APIError{Error: error.Error()})
+		return
+	}
+	defer responseAPI.Body.Close()
+
+	if responseAPI.StatusCode >= 400 {
+		responses.HandleHttpResponseErrors(rw, responseAPI)
+		return
+	}
+
+	responses.JSON(rw, responseAPI.StatusCode, nil)
+}
+
+// DeleteUser deletes the user that is logged in
+func DeleteUser(rw http.ResponseWriter, r *http.Request) {
+	cookie, _ := cookies.ReadCookie(r)
+	loggedUserID, _ := strconv.ParseUint(cookie["id"], 10, 64)
+
+	deleteUserAPIUrl := fmt.Sprintf("%s/users/%d", config.APIURL, loggedUserID)
+	responseAPI, error := requests.MakeRequestWithAuthenticationData(r, http.MethodDelete, deleteUserAPIUrl, nil)
+	if error != nil {
+		responses.JSON(rw, http.StatusInternalServerError, responses.APIError{Error: error.Error()})
+		return
+	}
+	defer responseAPI.Body.Close()
+
+	if responseAPI.StatusCode >= 400 {
+		responses.HandleHttpResponseErrors(rw, responseAPI)
+		return
+	}
+
+	responses.JSON(rw, responseAPI.StatusCode, nil)
 }

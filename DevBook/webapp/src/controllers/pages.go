@@ -242,3 +242,10 @@ func LoadEditProfilePage(rw http.ResponseWriter, r *http.Request) {
 	// now we can load the page with the user from channel
 	utils.RenderTemplate(rw, "edit-profile.html", user)
 }
+
+// LoadChangePasswordPage loads change password page
+func LoadChangePasswordPage(rw http.ResponseWriter, r *http.Request) {
+	// we don't need to fetch any data, because we just need: current password, new password and confirmation. The API will validate it
+
+	utils.RenderTemplate(rw, "change-password.html", nil)
+}

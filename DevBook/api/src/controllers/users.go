@@ -174,6 +174,7 @@ func UpdateUser(rw http.ResponseWriter, r *http.Request) {
 	}
 	defer db.Close()
 
+	log.Println(userToUpdate)
 	// create repository
 	repository := repositories.NewUsersRepository(db)
 	if error = repository.Update(userID, userToUpdate); error != nil {

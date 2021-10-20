@@ -106,9 +106,12 @@ func (repo Users) Update(ID uint64, userToUpdate models.User) error {
 
 	_, error = statement.Exec(userToUpdate.Name, userToUpdate.Nick, userToUpdate.Email, ID)
 	if error != nil {
-		return nil
+		return error
 	}
 	// everything is alright
+	log.Printf("Updated user ID %d with name = %s, nick = %s and email = %s",
+		ID, userToUpdate.Name, userToUpdate.Nick, userToUpdate.Email)
+
 	return nil
 }
 
